@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/civicteam/n8n-nodes-tool/main/screenshots/00-banner.png" alt="Civic — the security layer for AI agents" width="640" />
+</p>
+
 # @civic/n8n-nodes-tool
 
 An [n8n](https://n8n.io) community node that connects an AI Agent to **[Civic](https://www.civic.com)** — Civic's MCP gateway exposes 80+ managed tools (Google Workspace, Microsoft 365, CRMs, finance, dev tools) behind a single bearer token.
@@ -55,6 +59,10 @@ Configure a new **Civic API** credential with the token you copied. The credenti
 ### 4. Run
 
 Open the chat panel and ask the agent something that needs a Civic tool — e.g. *what's on my calendar this week?* The agent will call Civic tools as it needs them and synthesise the answer.
+
+### Example workflow
+
+A ready-to-import workflow lives at [`examples/civic-calendar.json`](examples/civic-calendar.json). It's the calendar-assistant setup shown above: a Chat Trigger → AI Agent with Anthropic Chat Model + Simple Memory + Civic tool. Download the file, then in n8n choose **Workflows → Import from File**. You'll need to bind your own **Civic API** and **Anthropic** credentials after import.
 
 ## How it works
 
