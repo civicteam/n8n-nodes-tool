@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Docs only. README walkthrough with screenshots from a clean install + setup
+  flow, Civic banner at the top, link to `docs.civic.com`, and an importable
+  example workflow at `examples/civic-calendar.json`.
+
 ## 0.2.0
 
 ### Major refactor — switch to `@civic/mcp-client`'s LangChain adapter

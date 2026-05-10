@@ -21,7 +21,7 @@ interface CivicCredentials {
 }
 
 const CIVIC_CLIENT_NAME = '@civic/n8n-nodes-tool';
-const CIVIC_CLIENT_VERSION = '0.2.0';
+const CIVIC_CLIENT_VERSION = '0.2.1';
 
 const buildClient = (apiToken: string): CivicMcpClient =>
 	new CivicMcpClient({
