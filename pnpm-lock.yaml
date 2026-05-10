@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@civic/mcp-client':
-        specifier: ^0.1.1
-        version: 0.1.1(@cfworker/json-schema@4.1.1)(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(zod@3.25.76)
+        specifier: ^1.0.1
+        version: 1.0.1(@cfworker/json-schema@4.1.1)(@langchain/core@1.1.45(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(ws@8.20.0))(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(zod@3.25.76)
       n8n-workflow:
         specifier: '*'
         version: 2.16.0
@@ -63,17 +63,17 @@ packages:
   '@cfworker/json-schema@4.1.1':
     resolution: {integrity: sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==}
 
-  '@civic/mcp-client@0.1.1':
-    resolution: {integrity: sha512-4LS+PmLPhCK0lDQNRjmBbJWOj7eXI54EaFKOi8YPvFGpwbqcE60bh/OtTNANVa/1QxLTW76yaKIKNlttI09/Ag==}
+  '@civic/mcp-client@1.0.1':
+    resolution: {integrity: sha512-/GT3W6xPHjHcuDQb7jcegvfAUcN32lssGsmEV//w2VsmeSh76acUZ9NAGVL7QPJRpCbePgY8WIewDJS4DhjPcw==}
     peerDependencies:
-      '@ai-sdk/mcp': ^1.0.19
       '@anthropic-ai/sdk': ^0.71.0
+      '@langchain/core': '>=1.0.0'
       ai: '>=6.0.79'
       openai: '>=6.9.1'
     peerDependenciesMeta:
-      '@ai-sdk/mcp':
-        optional: true
       '@anthropic-ai/sdk':
+        optional: true
+      '@langchain/core':
         optional: true
       ai:
         optional: true
@@ -3653,10 +3653,11 @@ snapshots:
 
   '@cfworker/json-schema@4.1.1': {}
 
-  '@civic/mcp-client@0.1.1(@cfworker/json-schema@4.1.1)(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(zod@3.25.76)':
+  '@civic/mcp-client@1.0.1(@cfworker/json-schema@4.1.1)(@langchain/core@1.1.45(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(ws@8.20.0))(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(zod@3.25.76)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
     optionalDependencies:
+      '@langchain/core': 1.1.45(openai@6.36.0(ws@8.20.0)(zod@3.25.76))(ws@8.20.0)
       openai: 6.36.0(ws@8.20.0)(zod@3.25.76)
     transitivePeerDependencies:
       - '@cfworker/json-schema'

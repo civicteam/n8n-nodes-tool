@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.0
+
+### Major refactor — switch to `@civic/mcp-client`'s LangChain adapter
+
+`@civic/mcp-client@1.0.1` ships a `langchainAdapter` that returns
+`DynamicStructuredTool[]` directly, with proper JSON-Schema → Zod conversion,
+content concatenation, and `isError` handling all built in. We now use it
+instead of building tools by hand.
+
+- `supplyData()` is now ~10 lines of orchestration (`client.getTools(langchainAdapter())`,
+  `logWrapper` each, wrap in `StructuredToolkit`).
+- Dropped the `toZodObject` helper, the `convertJsonSchemaToZod` runtime
+  resolution, and the schema-fallback chain — the adapter handles all that.
+- `runtime.ts` shrinks from 5 resolved exports to 2 (`StructuredToolkit` and
+  `logWrapper`). `@langchain/core` no longer needs runtime resolution because
+  the SDK declares it as a peer dependency, so the adapter's tool instances
+  are constructed against n8n's `@langchain/core` automatically.
+- Bumped `@civic/mcp-client` 0.1.1 → 1.0.1.
+- Bumped `tsconfig` `module`/`moduleResolution` to `node16` so the SDK's
+  exports map (`./adapters/langchain`) resolves at compile time.
+
+No user-facing changes — the node's UI, credential, parameters, and
+behaviour are identical to 0.1.1.
+
 ## 0.1.1
 
 - Dependency bumps: `@langchain/core` 1.1.44 → 1.1.45, `zod` 3.25.67 → 3.25.76.

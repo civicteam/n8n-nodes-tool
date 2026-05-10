@@ -1,6 +1,6 @@
 {
   "name": "@civic/n8n-nodes-tool",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "n8n community node that exposes Civic's MCP gateway as a tool to the AI Agent — bring 80+ Civic-managed tools (Google Workspace, Microsoft 365, CRMs, finance, dev tools) to any n8n workflow with a single bearer token.",
   "license": "MIT",
   "homepage": "https://github.com/civicteam/n8n-nodes-tool#readme",
@@ -48,7 +48,7 @@
     ]
   },
   "dependencies": {
-    "@civic/mcp-client": "^0.1.1"
+    "@civic/mcp-client": "^1.0.1"
   },
   "devDependencies": {
     "@langchain/core": "*",

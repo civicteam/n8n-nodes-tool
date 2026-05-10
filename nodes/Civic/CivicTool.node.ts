@@ -1,5 +1,6 @@
 /* eslint-disable @n8n/community-nodes/node-usable-as-tool -- this node is already an AiTool sub-node; auto-wrapping it would create a duplicate */
 import { CivicMcpClient } from '@civic/mcp-client';
+import { langchainAdapter } from '@civic/mcp-client/adapters/langchain';
 import type {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
@@ -12,12 +13,7 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-import {
-	extractToolArgs,
-	formatToolResult,
-	type McpToolDescriptor,
-	toZodObject,
-} from './helpers';
+import { extractToolArgs, formatToolResult } from './helpers';
 import { loadN8nRuntime } from './runtime';
 
 interface CivicCredentials {
@@ -25,7 +21,7 @@ interface CivicCredentials {
 }
 
 const CIVIC_CLIENT_NAME = '@civic/n8n-nodes-tool';
-const CIVIC_CLIENT_VERSION = '0.1.1';
+const CIVIC_CLIENT_VERSION = '0.2.0';
 
 const buildClient = (apiToken: string): CivicMcpClient =>
 	new CivicMcpClient({
@@ -44,15 +40,21 @@ const buildClient = (apiToken: string): CivicMcpClient =>
  * Workspace, Microsoft 365, CRMs, finance, dev tools, …) as an individually
  * callable LangChain tool.
  *
- * `supplyData()` returns a `StructuredToolkit` of `DynamicStructuredTool`s —
- * one per Civic-managed MCP tool. Each is wrapped with n8n's `logWrapper` so
- * invocations show up in the run log. When the agent dispatches a tool call,
- * the logWrapper bridge routes it through this node's `execute()` method,
- * which is why both methods exist on what would otherwise be a pure sub-node.
+ * `supplyData()` calls `client.getTools(langchainAdapter())` to get a ready
+ * `DynamicStructuredTool[]` from `@civic/mcp-client`. Each tool is wrapped
+ * with n8n's `logWrapper` (so invocations show up in the run log) and the
+ * array is packaged in an `n8n-core` `StructuredToolkit`.
  *
- * All LangChain and n8n-internal classes are resolved at runtime from n8n's
- * own module tree (see `runtime.ts`) to side-step the JS dual-package hazard
- * that pnpm's strict isolation would otherwise cause.
+ * When the agent dispatches a tool call, `logWrapper` bridges it through this
+ * node's `execute()` method (rather than the underlying tool's `func`), which
+ * is why both methods live on what would otherwise be a pure sub-node.
+ *
+ * `n8n-core`'s `StructuredToolkit` and `@n8n/ai-utilities`'s `logWrapper` are
+ * resolved at runtime from n8n's own module tree (see `runtime.ts`) to avoid
+ * the JS dual-package hazard that pnpm's strict isolation would otherwise
+ * cause. `@langchain/core` itself does NOT need runtime resolution: the SDK
+ * declares it as a peer dependency, so the adapter's tool instances are
+ * constructed against n8n's `@langchain/core` automatically.
  */
 export class CivicTool implements INodeType {
 	description: INodeTypeDescription = {
@@ -125,8 +127,12 @@ export class CivicTool implements INodeType {
 				const credentials = await this.getCredentials<CivicCredentials>('civicApi');
 				const client = buildClient(credentials.apiToken);
 				try {
+					// `getTools()` without an adapter calls the underlying MCP
+					// client directly, which requires an already-established
+					// session — so we connect explicitly first.
+					await client.connect();
 					const { tools } = await client.getTools();
-					return tools.map((tool: McpToolDescriptor) => ({
+					return tools.map((tool) => ({
 						name: tool.name,
 						value: tool.name,
 						description: tool.description ?? '',
@@ -155,6 +161,9 @@ export class CivicTool implements INodeType {
 		const client = buildClient(credentials.apiToken);
 
 		try {
+			// Establish the MCP session before dispatching any tool calls. From
+			// `@civic/mcp-client` v1, `callTool` does not auto-connect.
+			await client.connect();
 			const results: INodeExecutionData[] = [];
 			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 				try {
@@ -201,10 +210,9 @@ export class CivicTool implements INodeType {
 
 		const client = buildClient(credentials.apiToken);
 
-		let mcpTools: McpToolDescriptor[];
+		let allTools;
 		try {
-			const result = await client.getTools();
-			mcpTools = result.tools as McpToolDescriptor[];
+			allTools = await client.getTools(langchainAdapter());
 		} catch (error) {
 			throw new NodeOperationError(
 				this.getNode(),
@@ -215,32 +223,14 @@ export class CivicTool implements INodeType {
 
 		const filtered =
 			selectedTools.length > 0
-				? mcpTools.filter((tool) => selectedTools.includes(tool.name))
-				: mcpTools;
+				? allTools.filter((tool) => selectedTools.includes(tool.name))
+				: allTools;
 
-		const runtime = loadN8nRuntime();
-		const { DynamicStructuredTool, StructuredToolkit, logWrapper } = runtime;
-
-		const tools = filtered.map((mcpTool) => {
-			const tool = new DynamicStructuredTool({
-				name: mcpTool.name,
-				description: mcpTool.description ?? `Civic tool: ${mcpTool.name}`,
-				schema: toZodObject(mcpTool.inputSchema, runtime) as never,
-				func: async (args: unknown) => {
-					const result = await client.callTool(
-						mcpTool.name,
-						(args ?? {}) as Record<string, unknown>,
-					);
-					return formatToolResult(result.content);
-				},
-				metadata: { isFromToolkit: true },
-			});
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- bridging two DynamicStructuredTool generic instantiations
-			return logWrapper(tool as any, this);
-		});
+		const { StructuredToolkit, logWrapper } = loadN8nRuntime();
+		const wrapped = filtered.map((tool) => logWrapper(tool, this));
 
 		return {
-			response: new StructuredToolkit(tools),
+			response: new StructuredToolkit(wrapped),
 			closeFunction: async () => {
 				await client.close();
 			},
