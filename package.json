@@ -1,0 +1,66 @@
+{
+  "name": "@civic/n8n-nodes-tool",
+  "version": "0.1.0",
+  "description": "n8n community node that exposes Civic's MCP gateway as a tool to the AI Agent — bring 80+ Civic-managed tools (Google Workspace, Microsoft 365, CRMs, finance, dev tools) to any n8n workflow with a single bearer token.",
+  "license": "MIT",
+  "homepage": "https://github.com/civicteam/n8n-nodes-tool#readme",
+  "keywords": [
+    "n8n-community-node-package",
+    "civic",
+    "mcp",
+    "ai-agent"
+  ],
+  "author": {
+    "name": "Daniel Kelleher",
+    "email": "daniel@civic.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civicteam/n8n-nodes-tool.git"
+  },
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": false,
+    "credentials": [
+      "dist/credentials/CivicApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Civic/CivicTool.node.js"
+    ]
+  },
+  "dependencies": {
+    "@civic/mcp-client": "^0.1.1"
+  },
+  "devDependencies": {
+    "@langchain/core": "*",
+    "@n8n/node-cli": "*",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "release-it": "20.0.1",
+    "typescript": "5.9.3",
+    "vitest": "^4.1.5",
+    "zod": "^3.23.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}
